@@ -1,0 +1,3 @@
+#!/bin/bash
+cd src
+zip -9 -r ../game.love *
