@@ -1,3 +1,10 @@
+gfx = {
+  actor_bare = {
+    fsize = 16,
+    fnum = 4,
+  }
+}
+
 text = {
   img = nil,
   x = 100,
@@ -11,19 +18,26 @@ text = {
   max_y = 400,
 }
 
-gfx = {}
+function load_gfx(id)
+  if gfx[id].img == nil then
+    gfx[id].img = love.graphics.newImage("gfx/" .. id .. ".png")
+    gfx[id].frames = {}
 
-function load_gfx(filename)
-  if gfx[filename] == nil then
-    gfx[filename] = love.graphics.newImage("gfx/" .. filename)
+    local fnum = gfx[id].fnum
+    local fsize = gfx[id].fsize
+    for x = 0, fnum - 1 do
+      for y = 0, fnum - 1 do
+        gfx[id].frames[y*fnum + x] = love.graphics.newQuad(fsize * x, fsize * y, fsize, fsize, fsize*fnum, fsize*fnum)
+      end
+    end
   end
 
-  return gfx[filename]
+  return gfx[id]
 end
 
 
 function love.load()
-  text.img = load_gfx("actor_bare.png")
+  text.gfx = load_gfx("actor_bare")
 end
 
 
@@ -42,5 +56,5 @@ end
 
 function love.draw()
   -- love.graphics.print('Hello World!', text.x, text.y)
-  love.graphics.draw(text.img, text.x, text.y, 0, 1, 1, 1, 1)
+  love.graphics.draw(text.gfx.img, text.gfx.frames[0], text.x, text.y, 0, 3, 3)
 end
