@@ -1,3 +1,5 @@
+local Terebi = require('terebi')
+
 gfx = {
   actor_bare = {
     fsize = 16,
@@ -7,15 +9,15 @@ gfx = {
 
 text = {
   img = nil,
-  x = 100,
-  dx = 50,
-  min_x = 100,
-  max_x = 200,
+  x = 0,
+  dx = 1,
+  min_x = 0,
+  max_x = 144,
 
-  y = 200,
-  dy = 50,
-  min_y = 200,
-  max_y = 400,
+  y = 0,
+  dy = 1,
+  min_y = 0,
+  max_y = 224,
 }
 
 function load_gfx(id)
@@ -37,13 +39,25 @@ end
 
 
 function love.load()
+  Terebi.initializeLoveDefaults()
+
+  screen = Terebi.newScreen(160, 240, 3)
   text.gfx = load_gfx("actor_bare")
+  elapsed = 0.0
 end
 
 
 function love.update(dt)
-  text.x = text.x + text.dx * dt
-  text.y = text.y + text.dy * dt
+  elapsed = elapsed + dt
+  if elapsed > 1.0 / 6.0 then
+    love.tick()
+    elapsed = 0.0
+  end
+end
+
+function love.tick()
+  text.x = text.x + text.dx
+  text.y = text.y + text.dy
   if text.x < text.min_x or text.x > text.max_x then
     text.dx = text.dx * -1
   end
@@ -55,6 +69,12 @@ end
 
 
 function love.draw()
-  -- love.graphics.print('Hello World!', text.x, text.y)
-  love.graphics.draw(text.gfx.img, text.gfx.frames[0], text.x, text.y, 0, 3, 3)
+  love.graphics.setCanvas(screen:getCanvas())
+
+  love.graphics.setColor(50, 0, 0)
+  love.graphics.rectangle('fill', 0, 0, 160, 240)
+  love.graphics.setColor(255, 255, 255)
+  love.graphics.draw(text.gfx.img, text.gfx.frames[0], text.x, text.y)
+
+  screen:draw()
 end
