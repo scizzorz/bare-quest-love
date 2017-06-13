@@ -103,19 +103,35 @@ end
 
 -------------------------------------------------------------------------------
 
---[[
-local map = {}
-local map_mt = {__index = map}
+local batch = {}
+local batch_mt = {__index = batch}
 
-function map.new(...)
-  local ret = setmetatable({}, map_mt)
+function batch.new(...)
+  local ret = setmetatable({}, batch_mt)
   ret:init(...)
   return ret
 end
 
-function map:init(sprite_id)
+function batch:init(sprite_id)
+  self.x = 0
+  self.y = 0
+  self.map = {}
+  self.sprite = load_sprite(sprite_id)
+  self.batch = love.graphics.newSpriteBatch(self.sprite.gfx, 10 * 15)
+  self:update()
 end
-]]
+
+function batch:update()
+  self.batch:clear()
+  self.batch:add(self.sprite.quads[0], 16, 16)
+  self.batch:add(self.sprite.quads[0], 0, 48)
+  self.batch:flush()
+end
+
+function batch:draw()
+  love.graphics.setColor(255, 255, 255)
+  love.graphics.draw(self.batch)
+end
 
 -------------------------------------------------------------------------------
 
@@ -125,7 +141,7 @@ function love.load()
 
   screen = Terebi.newScreen(160, 240, 3)
   bare = object.new("bare")
-  map = object.new("map_field")
+  map = batch.new("map_field")
   elapsed = 0.0
 end
 
@@ -138,6 +154,7 @@ function love.update(dt)
 end
 
 function love.tick()
+  map:update()
   --[[
   text.x = text.x + text.dx
   text.y = text.y + text.dy
@@ -156,8 +173,9 @@ function love.draw()
 
   love.graphics.setColor(0, 0, 0)
   love.graphics.rectangle('fill', 0, 0, 160, 240)
-  bare:draw()
+
   map:draw()
+  bare:draw()
 
   screen:draw()
 end
