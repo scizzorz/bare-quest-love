@@ -159,8 +159,19 @@ function batch:init(id, width, height, map_size)
 end
 
 function batch:update()
-  local x_start = math.floor(-self.x / self.tile_size)
-  local y_start = math.floor(-self.y / self.tile_size)
+  local x_start = 0
+  self.x_off = self.x
+  while self.x_off + self.tile_size <= 0 do
+    self.x_off = self.x_off + self.tile_size
+    x_start = x_start + 1
+  end
+
+  local y_start = 0
+  self.y_off = self.y
+  while self.y_off + self.tile_size <= 0 do
+    self.y_off = self.y_off + self.tile_size
+    y_start = y_start + 1
+  end
 
   self.batch:clear()
   for x = 0, self.width - 1 do
@@ -175,7 +186,7 @@ end
 function batch:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(self.batch)
+    love.graphics.draw(self.batch, self.x_off, self.y_off)
   end
 end
 
@@ -187,7 +198,7 @@ function love.load()
 
   screen = Terebi.newScreen(WIDTH, HEIGHT, SCALE)
   bare = object.new("bare")
-  map = batch.new("map_field", 12, 17, 20)
+  map = batch.new("map_field", 12, 17, 40)
   knob = object.new("ui_knob")
   socket = object.new("ui_socket")
   knob.visible = false
@@ -215,17 +226,14 @@ end
 
 function love.tick()
   map:update()
-  --[[
-  text.x = text.x + text.dx
-  text.y = text.y + text.dy
-  if text.x < text.min_x or text.x > text.max_x then
-    text.dx = text.dx * -1
-  end
+  if pressed then
+    -- bare.x = bare.x + stick_x
+    -- bare.y = bare.y + stick_y
 
-  if text.y < text.min_y or text.y > text.max_y then
-    text.dy = text.dy * -1
+    -- faults if you go out of bounds
+    map.x = map.x - stick_x
+    map.y = map.y - stick_y
   end
-  ]]
 end
 
 -------------------------------------------------------------------------------
@@ -240,6 +248,11 @@ function love.draw()
   bare:draw()
   socket:draw()
   knob:draw()
+
+  if pressed then
+    love.graphics.print(stick_x, 0, 208)
+    love.graphics.print(stick_y, 0, 224)
+  end
 
   screen:draw()
 end
