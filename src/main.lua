@@ -262,6 +262,9 @@ function love.mousepressed(x, y)
 
   knob.x = stick_x_cur - 8
   knob.y = stick_y_cur - 8
+
+  stick_x = 0.0
+  stick_y = 0.0
 end
 
 function love.mousereleased(x, y)
@@ -281,8 +284,11 @@ function love.mousemoved(x, y, dx, dy)
       dist = 8
     end
 
-    stick_x_cur = stick_x_start + math.cos(angle) * dist
-    stick_y_cur = stick_y_start + math.sin(angle) * dist
+    stick_x = math.cos(angle) * dist / 8
+    stick_y = math.sin(angle) * dist / 8
+
+    stick_x_cur = stick_x_start + stick_x * 8
+    stick_y_cur = stick_y_start + stick_y * 8
 
     knob.x = stick_x_cur - 8
     knob.y = stick_y_cur - 8
