@@ -59,6 +59,11 @@ local sprites = {
     texture = "actor_bare",
     frameset = "actor",
   },
+
+  map_field = {
+    texture = "map_field",
+    frameset = "map",
+  },
 }
 
 function load_sprite(id)
@@ -75,7 +80,9 @@ local object = {}
 local object_mt = {__index = object}
 
 function object.new(...)
-  return setmetatable({}, object_mt):init(...)
+  local ret = setmetatable({}, object_mt)
+  ret:init(...)
+  return ret
 end
 
 function object:init(sprite_id)
@@ -86,7 +93,6 @@ function object:init(sprite_id)
   self.angle = 0
   self.frame = 0
   self.sprite = load_sprite(sprite_id)
-  return self
 end
 
 function object:draw()
@@ -97,12 +103,29 @@ end
 
 -------------------------------------------------------------------------------
 
+--[[
+local map = {}
+local map_mt = {__index = map}
+
+function map.new(...)
+  local ret = setmetatable({}, map_mt)
+  ret:init(...)
+  return ret
+end
+
+function map:init(sprite_id)
+end
+]]
+
+-------------------------------------------------------------------------------
+
 function love.load()
   print("love.load")
   Terebi.initializeLoveDefaults()
 
   screen = Terebi.newScreen(160, 240, 3)
   bare = object.new("bare")
+  map = object.new("map_field")
   elapsed = 0.0
 end
 
@@ -134,6 +157,7 @@ function love.draw()
   love.graphics.setColor(0, 0, 0)
   love.graphics.rectangle('fill', 0, 0, 160, 240)
   bare:draw()
+  map:draw()
 
   screen:draw()
 end
