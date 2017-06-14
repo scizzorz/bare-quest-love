@@ -1,4 +1,3 @@
-local FPS = 60.0
 local SCALE = 3
 local WIDTH = 160
 local HEIGHT = 240
@@ -201,13 +200,20 @@ end
 function love.load()
   print("love.load")
 
+  WIDTH = love.graphics.getWidth() / SCALE
+  HEIGHT = love.graphics.getHeight() / SCALE
+
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.graphics.setLineStyle('rough')
 
   bare = object.new("bare")
-  map = batch.new("map_field", 12, 17, 40)
+  bare.x = WIDTH / 2 - 8
+  bare.y = HEIGHT / 2 - 8
+
+  map = batch.new("map_field", 12, 20, 64)
   knob = object.new("ui_knob")
   socket = object.new("ui_socket")
+
   knob.visible = false
   socket.visible = false
 
@@ -224,14 +230,6 @@ end
 -------------------------------------------------------------------------------
 
 function love.update(dt)
-  elapsed = elapsed + dt
-  if elapsed > 1.0 / FPS then
-    love.tick()
-    elapsed = 0.0
-  end
-end
-
-function love.tick()
   map:update()
   if pressed then
     -- bare.x = bare.x + stick_x
@@ -246,9 +244,6 @@ end
 -------------------------------------------------------------------------------
 
 function love.draw()
-  love.graphics.setColor(0, 0, 0)
-  love.graphics.rectangle('fill', 0, 0, 480, 720)
-
   map:draw()
   bare:draw()
   socket:draw()
