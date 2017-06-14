@@ -12,6 +12,10 @@ function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 -- Returns the angle between two points.
 function math.angle(x1,y1, x2,y2) return math.atan2(y2-y1, x2-x1) end
 
+function S(v)
+  return math.floor(SCALE * v)
+end
+
 -------------------------------------------------------------------------------
 
 local gfx = {}
@@ -118,7 +122,8 @@ function object:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(self.gfx, self.quads[self.frame],
-                      self.x, self.y, self.angle, self.sx, self.sy)
+                      S(self.x), S(self.y), self.angle,
+                      S(self.sx), S(self.sy))
   end
 end
 
@@ -186,7 +191,9 @@ end
 function batch:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(self.batch, self.x_off, self.y_off)
+    love.graphics.draw(self.batch,
+                       S(self.x_off), S(self.y_off), 0,
+                       S(1), S(1))
   end
 end
 
@@ -194,9 +201,10 @@ end
 
 function love.load()
   print("love.load")
-  Terebi.initializeLoveDefaults()
 
-  screen = Terebi.newScreen(WIDTH, HEIGHT, SCALE)
+  love.graphics.setDefaultFilter('nearest', 'nearest')
+  love.graphics.setLineStyle('rough')
+
   bare = object.new("bare")
   map = batch.new("map_field", 12, 17, 40)
   knob = object.new("ui_knob")
@@ -239,10 +247,8 @@ end
 -------------------------------------------------------------------------------
 
 function love.draw()
-  love.graphics.setCanvas(screen:getCanvas())
-
   love.graphics.setColor(0, 0, 0)
-  love.graphics.rectangle('fill', 0, 0, 160, 240)
+  love.graphics.rectangle('fill', 0, 0, 480, 720)
 
   map:draw()
   bare:draw()
@@ -253,8 +259,6 @@ function love.draw()
     love.graphics.print(stick_x, 0, 208)
     love.graphics.print(stick_y, 0, 224)
   end
-
-  screen:draw()
 end
 
 -------------------------------------------------------------------------------
