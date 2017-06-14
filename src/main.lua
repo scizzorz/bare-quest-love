@@ -1,4 +1,3 @@
-local Terebi = require('terebi')
 local FPS = 60.0
 local SCALE = 3
 local WIDTH = 160
