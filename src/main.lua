@@ -179,8 +179,10 @@ function batch:update()
   self.batch:clear()
   for x = 0, self.width - 1 do
     for y = 0, self.height - 1 do
-      self.batch:add(self.quads[self.map[x_start + x][y_start + y]],
-                     x * self.tile_size, y * self.tile_size)
+      if self.map[x_start + x] and self.map[x_start + x][y_start + y] then
+        self.batch:add(self.quads[self.map[x_start + x][y_start + y]],
+                      x * self.tile_size, y * self.tile_size)
+      end
     end
   end
   self.batch:flush()
@@ -193,6 +195,53 @@ function batch:draw()
                        S(self.x_off), S(self.y_off), 0,
                        S(1), S(1))
   end
+end
+
+-------------------------------------------------------------------------------
+
+function move(x, y)
+  local hspace = WIDTH / 3
+  local vspace = HEIGHT / 3
+
+  bare.x = bare.x + x
+  bare.y = bare.y + y
+
+  if map.x < 0 then
+    if bare.x < hspace then
+      map.x = map.x - (bare.x - hspace)
+      bare.x = hspace
+    end
+  elseif bare.x < 0 then
+    bare.x = 0
+  end
+
+  if map.x > WIDTH - 16 * 64 then
+    if bare.x > WIDTH - 16 - hspace then
+      map.x = map.x - (bare.x - (WIDTH - 16 - hspace))
+      bare.x = (WIDTH - 16 - hspace)
+    end
+  elseif bare.x > WIDTH - 16 then
+    bare.x = WIDTH - 16
+  end
+
+  if map.y < 0 then
+    if bare.y < vspace then
+      map.y = map.y - (bare.y - vspace)
+      bare.y = vspace
+    end
+  elseif bare.y < 0 then
+    bare.y = 0
+  end
+
+  if map.y > HEIGHT - 16 * 64 then
+    if bare.y > HEIGHT - 16 - vspace then
+      map.y = map.y - (bare.y - (HEIGHT - 16 - vspace))
+      bare.y = (HEIGHT - 16 - vspace)
+    end
+  elseif bare.y > HEIGHT - 16 then
+    bare.y = HEIGHT - 16
+  end
+
 end
 
 -------------------------------------------------------------------------------
@@ -211,6 +260,9 @@ function love.load()
   bare.y = HEIGHT / 2 - 8
 
   map = batch.new("map_field", 12, 20, 64)
+  map.x = WIDTH / 2 - 64 * 16 / 2
+  map.y = WIDTH / 2 - 64 * 16 / 2
+
   knob = object.new("ui_knob")
   socket = object.new("ui_socket")
 
@@ -232,12 +284,13 @@ end
 function love.update(dt)
   map:update()
   if pressed then
+    move(stick_x, stick_y)
     -- bare.x = bare.x + stick_x
     -- bare.y = bare.y + stick_y
 
     -- faults if you go out of bounds
-    map.x = map.x - stick_x
-    map.y = map.y - stick_y
+    --map.x = map.x - stick_x
+    --map.y = map.y - stick_y
   end
 end
 
@@ -250,8 +303,8 @@ function love.draw()
   knob:draw()
 
   if pressed then
-    love.graphics.print(stick_x, 0, 208)
-    love.graphics.print(stick_y, 0, 224)
+    love.graphics.print(stick_x, 0, 0)
+    love.graphics.print(stick_y, 0, 16)
   end
 end
 
