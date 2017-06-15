@@ -1,5 +1,5 @@
-local MIN_WIDTH = 240
-local MIN_HEIGHT = 240
+local MIN_WIDTH = 160
+local MIN_HEIGHT = 160
 local SCALE = 3
 
 -------------------------------------------------------------------------------
