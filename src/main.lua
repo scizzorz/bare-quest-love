@@ -1,6 +1,6 @@
+local MAX_WIDTH = 240
+local MAX_HEIGHT = 240
 local SCALE = 3
-local WIDTH = 160
-local HEIGHT = 240
 
 -------------------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ function object:draw()
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(self.gfx, self.quads[self.frame],
                       S(self.x), S(self.y), self.angle,
-                      S(self.sx), S(self.sy))
+                      SCALE * self.sx, SCALE * self.sy)
   end
 end
 
@@ -193,7 +193,7 @@ function batch:draw()
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(self.batch,
                        S(self.x_off), S(self.y_off), 0,
-                       S(1), S(1))
+                       SCALE, SCALE)
   end
 end
 
@@ -249,8 +249,29 @@ end
 function love.load()
   print("love.load")
 
-  WIDTH = love.graphics.getWidth() / SCALE
-  HEIGHT = love.graphics.getHeight() / SCALE
+  local screen_width, screen_height = love.graphics.getDimensions()
+  if screen_width < screen_height then
+    WIDTH = math.ceil((screen_width / screen_height) * MAX_WIDTH)
+    HEIGHT = MAX_HEIGHT
+    CANVAS_SCALE = screen_height / MAX_HEIGHT / SCALE
+  else
+    WIDTH = MAX_WIDTH
+    HEIGHT = math.ceil((screen_height / screen_width) * MAX_HEIGHT)
+    CANVAS_SCALE = screen_width / MAX_WIDTH / SCALE
+  end
+
+  canvas = love.graphics.newCanvas(WIDTH * SCALE, HEIGHT * SCALE)
+
+  local map_size = 64
+  local tile_size = 16
+  local map_width = math.ceil(WIDTH / tile_size) + 2
+  local map_height = math.ceil(HEIGHT / tile_size) + 2
+
+  print('window:  ' .. screen_width .. ' x ' .. screen_height)
+  print('canvas:  ' .. WIDTH .. ' x ' .. HEIGHT)
+  print('map:     ' .. map_width .. ' x ' .. map_height)
+  print('scale:   ' .. SCALE)
+  print('c scale: ' .. CANVAS_SCALE)
 
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.graphics.setLineStyle('rough')
@@ -259,9 +280,9 @@ function love.load()
   bare.x = WIDTH / 2 - 8
   bare.y = HEIGHT / 2 - 8
 
-  map = batch.new("map_field", 12, 20, 64)
-  map.x = WIDTH / 2 - 64 * 16 / 2
-  map.y = WIDTH / 2 - 64 * 16 / 2
+  map = batch.new("map_field", map_width, map_height, map_size)
+  map.x = WIDTH / 2 - map_size * tile_size / 2
+  map.y = HEIGHT / 2 - map_size * tile_size / 2
 
   knob = object.new("ui_knob")
   socket = object.new("ui_socket")
@@ -285,18 +306,14 @@ function love.update(dt)
   map:update()
   if pressed then
     move(stick_x, stick_y)
-    -- bare.x = bare.x + stick_x
-    -- bare.y = bare.y + stick_y
-
-    -- faults if you go out of bounds
-    --map.x = map.x - stick_x
-    --map.y = map.y - stick_y
   end
 end
 
 -------------------------------------------------------------------------------
 
 function love.draw()
+  love.graphics.setCanvas(canvas)
+
   map:draw()
   bare:draw()
   socket:draw()
@@ -306,6 +323,9 @@ function love.draw()
     love.graphics.print(stick_x, 0, 0)
     love.graphics.print(stick_y, 0, 16)
   end
+
+  love.graphics.setCanvas()
+  love.graphics.draw(canvas, 0, 0, 0, CANVAS_SCALE, CANVAS_SCALE)
 end
 
 -------------------------------------------------------------------------------
