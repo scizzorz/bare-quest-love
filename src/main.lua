@@ -1,5 +1,5 @@
-local MAX_WIDTH = 240
-local MAX_HEIGHT = 240
+local MIN_WIDTH = 240
+local MIN_HEIGHT = 240
 local SCALE = 3
 
 -------------------------------------------------------------------------------
@@ -12,6 +12,14 @@ function math.angle(x1,y1, x2,y2) return math.atan2(y2-y1, x2-x1) end
 
 function S(v)
   return math.floor(SCALE * v)
+end
+
+function p2s(v)
+  return v * SCALE * CANVAS_SCALE
+end
+
+function s2p(v)
+  return v / SCALE / CANVAS_SCALE
 end
 
 -------------------------------------------------------------------------------
@@ -251,13 +259,13 @@ function love.load()
 
   local screen_width, screen_height = love.graphics.getDimensions()
   if screen_width < screen_height then
-    WIDTH = math.ceil((screen_width / screen_height) * MAX_WIDTH)
-    HEIGHT = MAX_HEIGHT
-    CANVAS_SCALE = screen_height / MAX_HEIGHT / SCALE
+    WIDTH = MIN_WIDTH
+    HEIGHT = math.ceil(screen_height / screen_width * MIN_WIDTH)
+    CANVAS_SCALE = screen_width / MIN_WIDTH / SCALE
   else
-    WIDTH = MAX_WIDTH
-    HEIGHT = math.ceil((screen_height / screen_width) * MAX_HEIGHT)
-    CANVAS_SCALE = screen_width / MAX_WIDTH / SCALE
+    HEIGHT = MIN_HEIGHT
+    WIDTH = math.ceil(screen_width / screen_height * MIN_HEIGHT)
+    CANVAS_SCALE = screen_height / MIN_HEIGHT / SCALE
   end
 
   canvas = love.graphics.newCanvas(WIDTH * SCALE, HEIGHT * SCALE)
@@ -335,14 +343,14 @@ function love.mousepressed(x, y)
   socket.visible = true
   knob.visible = true
 
-  stick_x_start = (x/SCALE)
-  stick_y_start = (y/SCALE)
+  stick_x_start = s2p(x)
+  stick_y_start = s2p(y)
 
   socket.x = stick_x_start - 16
   socket.y = stick_y_start - 16
 
-  stick_x_cur = (x/SCALE)
-  stick_y_cur = (y/SCALE)
+  stick_x_cur = s2p(x)
+  stick_y_cur = s2p(y)
 
   knob.x = stick_x_cur - 8
   knob.y = stick_y_cur - 8
@@ -359,8 +367,8 @@ end
 
 function love.mousemoved(x, y, dx, dy)
   if pressed then
-    stick_x_cur = (x/SCALE)
-    stick_y_cur = (y/SCALE)
+    stick_x_cur = s2p(x)
+    stick_y_cur = s2p(y)
 
     local angle = math.angle(stick_x_start, stick_y_start, stick_x_cur, stick_y_cur)
     local dist = math.dist(stick_x_start, stick_y_start, stick_x_cur, stick_y_cur)
