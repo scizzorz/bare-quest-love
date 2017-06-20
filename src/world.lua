@@ -1,4 +1,8 @@
-local batch = {}
+require('conf')
+require('gfx')
+require('util')
+
+batch = {}
 local batch_mt = {__index = batch}
 
 batch.GRASS = 0
@@ -190,5 +194,3 @@ function batch:draw()
     love.graphics.draw(self.dirt, S(self.x_off), S(self.y_off), 0, SCALE, SCALE)
   end
 end
-
-return batch

@@ -1,4 +1,8 @@
-local object = {}
+require('conf')
+require('gfx')
+require('util')
+
+object = {}
 local object_mt = {__index = object}
 
 function object.new(...)
@@ -28,5 +32,3 @@ function object:draw()
                       SCALE * self.sx, SCALE * self.sy)
   end
 end
-
-return object

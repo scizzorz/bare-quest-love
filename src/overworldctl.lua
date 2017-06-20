@@ -1,7 +1,7 @@
-local object = require('sprite')
-local batch = require('world')
+require('sprite')
+require('world')
 
-local overworldctl = {}
+overworldctl = {}
 local overworldctl_mt = {__index = overworldctl}
 
 function overworldctl.new(...)
@@ -147,5 +147,3 @@ function overworldctl:move(x, y)
     bare.y = HEIGHT - 16
   end
 end
-
-return overworldctl

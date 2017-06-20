@@ -1,4 +1,4 @@
-local engine = {}
+engine = {}
 local engine_mt = {__index = engine}
 
 function engine.new(...)
@@ -67,5 +67,3 @@ function engine:draw()
     val:draw()
   end
 end
-
-return engine
