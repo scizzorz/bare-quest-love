@@ -9,10 +9,29 @@ end
 
 function engine:init()
   self.sprites = {}
-  self.control = {}
+  self.controls = {}
+end
+
+function engine:add_control(control)
+  table.insert(self.controls, control)
+end
+
+function engine:rm_control(control)
+  for key, val in ipairs(self.controls) do
+    if val == control then
+      table.remove(self.controls, key)
+      break
+    end
+  end
 end
 
 function engine:update(dt)
+  for key, val in ipairs(self.controls) do
+    if val:update(dt) then
+    else
+      break
+    end
+  end
 end
 
 function engine:add_sprite(sprite)
