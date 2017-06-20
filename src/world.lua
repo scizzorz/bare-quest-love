@@ -98,18 +98,22 @@ end
 function batch:gen_map()
   self.grass_map = {}
   self.dirt_map = {}
+  self.tree_map = {}
 
   for x = 0, self.map_size - 1 do
     self.grass_map[x] = {}
     self.dirt_map[x] = {}
+    self.tree_map[x] = {}
 
     for y = 0, self.map_size - 1 do
+      -- draw grass layer
       if self.rng:random() < 0.8 then
         self.grass_map[x][y] = math.floor(self.rng:random() * 4)
       else
         self.grass_map[x][y] = math.floor(self.rng:random() * 3) + 4
       end
 
+      -- draw dirt patches
       local frame = 8
       if self:check_corner(self.DIRT, x, y+1) then
         frame = frame + 1
@@ -125,6 +129,20 @@ function batch:gen_map()
       end
 
       self.dirt_map[x][y] = frame
+
+      -- draw trees
+      frame = 0
+      if self.tiles[x][y] == self.DIRT then
+        frame = 23
+      elseif self.tiles[x][y] == self.BLOCK then
+        frame = 7
+      elseif self.tiles[x][y] == self.EDGE then
+        frame = 7
+      end
+
+      if frame > 0 then
+        self.tree_map[x][y] = frame
+      end
     end
   end
 end
@@ -146,8 +164,7 @@ function batch:init(id, width, height, map_size)
   self.width = width
   self.height = height
 
-  self.grass = love.graphics.newSpriteBatch(self.gfx, width * height)
-  self.dirt = love.graphics.newSpriteBatch(self.gfx, width * height)
+  self.batch = love.graphics.newSpriteBatch(self.gfx, width * height * 3)
 
   self:update()
 end
@@ -167,8 +184,7 @@ function batch:update()
     y_start = y_start + 1
   end
 
-  self.grass:clear()
-  self.dirt:clear()
+  self.batch:clear()
 
   for x = 0, self.width - 1 do
     for y = 0, self.height - 1 do
@@ -176,21 +192,23 @@ function batch:update()
         local tile = self.tiles[x_start + x][y_start + y]
         local grass_tex = self.grass_map[x_start + x][y_start + y]
         local dirt_tex = self.dirt_map[x_start + x][y_start + y]
+        local tree_tex = self.tree_map[x_start + x][y_start + y]
 
-        self.grass:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
-        self.dirt:add(self.quads[dirt_tex], x * self.tile_size, y * self.tile_size)
+        self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
+        self.batch:add(self.quads[dirt_tex], x * self.tile_size, y * self.tile_size)
+        if tree_tex then
+          self.batch:add(self.quads[tree_tex], x * self.tile_size, y * self.tile_size)
+        end
       end
     end
   end
 
-  self.grass:flush()
-  self.dirt:flush()
+  self.batch:flush()
 end
 
 function batch:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(self.grass, S(self.x_off), S(self.y_off), 0, SCALE, SCALE)
-    love.graphics.draw(self.dirt, S(self.x_off), S(self.y_off), 0, SCALE, SCALE)
+    love.graphics.draw(self.batch, S(self.x_off), S(self.y_off), 0, SCALE, SCALE)
   end
 end
