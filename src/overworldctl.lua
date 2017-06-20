@@ -10,7 +10,9 @@ function overworldctl.new(...)
   return ret
 end
 
-function overworldctl:init()
+function overworldctl:init(engine)
+  self.engine = engine
+
   local map_size = 64
   local tile_size = 16
   local map_width = math.ceil(WIDTH / tile_size) + 2

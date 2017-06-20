@@ -31,7 +31,7 @@ function love.load()
   love.graphics.setLineStyle('rough')
 
   ENGINE = engine.new()
-  OVERWORLD = overworldctl.new()
+  OVERWORLD = overworldctl.new(ENGINE)
 
   ENGINE:add_control(OVERWORLD)
 
