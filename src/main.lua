@@ -6,10 +6,6 @@ local batch = require('world')
 local engine = require('engine')
 local overworldctl = require('overworldctl')
 
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
 function love.load()
   print("love.load")
 
@@ -46,14 +42,6 @@ function love.load()
 
 end
 
--------------------------------------------------------------------------------
-
-function love.update(dt)
-  ENGINE:update(dt)
-end
-
--------------------------------------------------------------------------------
-
 function love.draw()
   love.graphics.setCanvas(canvas)
 
@@ -68,53 +56,18 @@ function love.draw()
   love.graphics.draw(canvas, 0, 0, 0, CANVAS_SCALE, CANVAS_SCALE)
 end
 
--------------------------------------------------------------------------------
-
-function love.mousepressed(x, y)
-  pressed = true
-  socket.visible = true
-  knob.visible = true
-
-  stick_x_start = s2p(x)
-  stick_y_start = s2p(y)
-
-  socket.x = stick_x_start - 16
-  socket.y = stick_y_start - 16
-
-  stick_x_cur = s2p(x)
-  stick_y_cur = s2p(y)
-
-  knob.x = stick_x_cur - 8
-  knob.y = stick_y_cur - 8
-
-  stick_x = 0.0
-  stick_y = 0.0
+function love.update(...)
+  ENGINE:update(...)
 end
 
-function love.mousereleased(x, y)
-  pressed = false
-  socket.visible = false
-  knob.visible = false
+function love.mousepressed(...)
+  ENGINE:mousepressed(...)
 end
 
-function love.mousemoved(x, y, dx, dy)
-  if pressed then
-    stick_x_cur = s2p(x)
-    stick_y_cur = s2p(y)
+function love.mousereleased(...)
+  ENGINE:mousereleased(...)
+end
 
-    local angle = math.angle(stick_x_start, stick_y_start, stick_x_cur, stick_y_cur)
-    local dist = math.dist(stick_x_start, stick_y_start, stick_x_cur, stick_y_cur)
-    if dist > 8 then
-      dist = 8
-    end
-
-    stick_x = math.cos(angle) * dist / 8
-    stick_y = math.sin(angle) * dist / 8
-
-    stick_x_cur = stick_x_start + stick_x * 8
-    stick_y_cur = stick_y_start + stick_y * 8
-
-    knob.x = stick_x_cur - 8
-    knob.y = stick_y_cur - 8
-  end
+function love.mousemoved(...)
+  ENGINE:mousemoved(...)
 end

@@ -25,15 +25,6 @@ function engine:rm_control(control)
   end
 end
 
-function engine:update(dt)
-  for key, val in ipairs(self.controls) do
-    if val:update(dt) then
-    else
-      break
-    end
-  end
-end
-
 function engine:add_sprite(sprite)
   table.insert(self.sprites, sprite)
 end
@@ -45,6 +36,30 @@ function engine:rm_sprite(sprite)
       break
     end
   end
+end
+
+function engine:control(event, ...)
+  for key, val in ipairs(self.controls) do
+    if not val[event](val, ...) then
+      break
+    end
+  end
+end
+
+function engine:update(...)
+  self:control('update', ...)
+end
+
+function engine:mousepressed(...)
+  self:control('mousepressed', ...)
+end
+
+function engine:mousereleased(...)
+  self:control('mousereleased', ...)
+end
+
+function engine:mousemoved(...)
+  self:control('mousemoved', ...)
 end
 
 function engine:draw()
