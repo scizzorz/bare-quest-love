@@ -3,6 +3,7 @@ require('gfx')
 require('util')
 local object = require('sprite')
 local batch = require('world')
+local engine = require('engine')
 
 -------------------------------------------------------------------------------
 
@@ -83,6 +84,8 @@ function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
   love.graphics.setLineStyle('rough')
 
+  ENGINE = engine.new()
+
   bare = object.new("bare")
   bare.x = WIDTH / 2 - 8
   bare.y = HEIGHT / 2 - 8
@@ -105,6 +108,12 @@ function love.load()
   stick_x = 0.0
   stick_y = 0.0
   elapsed = 0.0
+
+  ENGINE:add_sprite(map)
+  ENGINE:add_sprite(bare)
+  ENGINE:add_sprite(socket)
+  ENGINE:add_sprite(knob)
+
 end
 
 -------------------------------------------------------------------------------
@@ -121,10 +130,7 @@ end
 function love.draw()
   love.graphics.setCanvas(canvas)
 
-  map:draw()
-  bare:draw()
-  socket:draw()
-  knob:draw()
+  ENGINE:draw()
 
   if pressed then
     love.graphics.print(stick_x, 0, 0)
