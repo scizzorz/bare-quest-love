@@ -18,7 +18,7 @@ function overworldctl:init(engine)
   local map_width = math.ceil(WIDTH / tile_size) + 2
   local map_height = math.ceil(HEIGHT / tile_size) + 2
 
-  bare = object.new("bare")
+  bare = sprite.new("bare")
   bare.x = WIDTH / 2 - 8
   bare.y = HEIGHT / 2 - 8
 
@@ -26,8 +26,8 @@ function overworldctl:init(engine)
   map.x = WIDTH / 2 - map_size * tile_size / 2
   map.y = HEIGHT / 2 - map_size * tile_size / 2
 
-  knob = object.new("ui_knob")
-  socket = object.new("ui_socket")
+  knob = sprite.new("ui_knob")
+  socket = sprite.new("ui_socket")
 
   knob.visible = false
   socket.visible = false

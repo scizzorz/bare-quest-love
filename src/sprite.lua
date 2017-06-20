@@ -2,16 +2,16 @@ require('conf')
 require('gfx')
 require('util')
 
-object = {}
-local object_mt = {__index = object}
+sprite = {}
+local sprite_mt = {__index = sprite}
 
-function object.new(...)
-  local ret = setmetatable({}, object_mt)
+function sprite.new(...)
+  local ret = setmetatable({}, sprite_mt)
   ret:init(...)
   return ret
 end
 
-function object:init(id)
+function sprite:init(id)
   self.x = 0
   self.y = 0
   self.sx = 1
@@ -24,7 +24,7 @@ function object:init(id)
   self.quads = load_quads(atlas[id].frameset)
 end
 
-function object:draw()
+function sprite:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(self.gfx, self.quads[self.frame],
