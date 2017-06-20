@@ -2,22 +2,22 @@ require('conf')
 require('gfx')
 require('util')
 
-batch = {}
-local batch_mt = {__index = batch}
+world = {}
+local world_mt = {__index = world}
 
-batch.GRASS = 0
-batch.DIRT = 1
-batch.BLOCK = 2
-batch.EDGE = 3
-batch.NUM_TILES = 4
+world.GRASS = 0
+world.DIRT = 1
+world.BLOCK = 2
+world.EDGE = 3
+world.NUM_TILES = 4
 
-function batch.new(...)
-  local ret = setmetatable({}, batch_mt)
+function world.new(...)
+  local ret = setmetatable({}, world_mt)
   ret:init(...)
   return ret
 end
 
-function batch:gen_terrain()
+function world:gen_terrain()
   self.tiles = {}
 
   for x = 0, self.map_size - 1 do
@@ -33,10 +33,9 @@ function batch:gen_terrain()
     local tile = math.floor(self.rng:random() * self.NUM_TILES)
     self:corrupt(x, y, tile, 0.8, 0.8)
   end
-
 end
 
-function batch:density()
+function world:density()
   local total = 0
   local taken = 0
 
@@ -52,7 +51,7 @@ function batch:density()
   return taken / total
 end
 
-function batch:corrupt(x, y, tile, spread, decay)
+function world:corrupt(x, y, tile, spread, decay)
   -- don't corrupt near the edges
   if x < 5 or y < 5 or x > self.map_size - 5 or y > self.map_size - 5 then
     return
@@ -75,7 +74,7 @@ function batch:corrupt(x, y, tile, spread, decay)
   end
 end
 
-function batch:check_corner(expect, x, y)
+function world:check_corner(expect, x, y)
   if x > 0 and y > 0 and self.tiles[x-1][y-1] == expect then
     return true
   end
@@ -95,7 +94,7 @@ function batch:check_corner(expect, x, y)
   return false
 end
 
-function batch:gen_map()
+function world:gen_map()
   self.grass_map = {}
   self.dirt_map = {}
   self.tree_map = {}
@@ -147,7 +146,7 @@ function batch:gen_map()
   end
 end
 
-function batch:init(id, width, height, map_size)
+function world:init(id, width, height, map_size)
   self.x = 0
   self.y = 0
   self.visible = true
@@ -169,7 +168,7 @@ function batch:init(id, width, height, map_size)
   self:update()
 end
 
-function batch:update()
+function world:update()
   local x_start = 0
   self.x_off = self.x
   while self.x_off + self.tile_size <= 0 do
@@ -206,7 +205,7 @@ function batch:update()
   self.batch:flush()
 end
 
-function batch:draw()
+function world:draw()
   if self.visible then
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(self.batch, S(self.x_off), S(self.y_off), 0, SCALE, SCALE)

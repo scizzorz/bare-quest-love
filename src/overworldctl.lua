@@ -22,7 +22,7 @@ function overworldctl:init(engine)
   bare.x = WIDTH / 2 - 8
   bare.y = HEIGHT / 2 - 8
 
-  map = batch.new("map_field", map_width, map_height, map_size)
+  map = world.new("map_field", map_width, map_height, map_size)
   map.x = WIDTH / 2 - map_size * tile_size / 2
   map.y = HEIGHT / 2 - map_size * tile_size / 2
 
