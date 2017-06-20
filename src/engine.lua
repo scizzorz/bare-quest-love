@@ -14,12 +14,18 @@ end
 
 function engine:add_control(control)
   table.insert(self.controls, control)
+  if control.add then
+    control:add(self)
+  end
 end
 
 function engine:rm_control(control)
   for key, val in ipairs(self.controls) do
     if val == control then
       table.remove(self.controls, key)
+      if control.drop then
+        control:drop(self)
+      end
       break
     end
   end
@@ -40,7 +46,7 @@ end
 
 function engine:control(event, ...)
   for key, val in ipairs(self.controls) do
-    if not val[event](val, ...) then
+    if val[event] and not val[event](val, ...) then
       break
     end
   end
