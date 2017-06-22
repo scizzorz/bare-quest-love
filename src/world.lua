@@ -4,8 +4,6 @@ require('util')
 
 local ZONE_SIZE = 240
 local WAVELENGTH = 250
-local XSEED = love.math.random() * ZONE_SIZE
-local YSEED = love.math.random() * ZONE_SIZE
 
 world = {}
 local world_mt = {__index = world}
@@ -159,7 +157,10 @@ function world:init(id, width, height, map_size)
   self.gfx = load_gfx(atlas[id].texture)
   self.quads = load_quads(atlas[id].frameset)
   self.tile_size = framesets[atlas[id].frameset].size
+
   self.rng = love.math.newRandomGenerator()
+  self.xseed = self.rng.random() * ZONE_SIZE
+  self.yseed = self.rng.random() * ZONE_SIZE
 
   self.map_size = map_size
   self.width = width
@@ -210,15 +211,25 @@ function world:update()
       local xcenter = xzone * ZONE_SIZE + ZONE_SIZE / 2
       local ycenter = yzone * ZONE_SIZE + ZONE_SIZE / 2
 
-      local zone = math.floor(love.math.noise(XSEED + xzone, YSEED + yzone) * 4) + 1
+      local zone = math.floor(love.math.noise(self.xseed + xzone, self.yseed + yzone) * 4) + 1
       local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
       local prob = 1 - dist^2
-      local val = love.math.noise(xreal / WAVELENGTH + XSEED, yreal / WAVELENGTH + YSEED)
+      local val = love.math.noise(xreal / WAVELENGTH + self.xseed, yreal / WAVELENGTH + self.yseed)
+
+      love.math.setRandomSeed(xreal * yreal)
+      local subval = love.math.random()
 
       local grass_tex = 0
 
+      if subval < 0.8 then
+        grass_tex = math.floor(subval / 0.8 * 4)
+      else
+        grass_tex = math.floor((subval - 0.8) / 0.2 * 3) + 4
+      end
+
+
       if val < prob then
-        grass_tex = zone * 32
+        grass_tex = grass_tex + zone * 32
       end
 
       self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
