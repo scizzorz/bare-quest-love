@@ -2,6 +2,11 @@ require('conf')
 require('gfx')
 require('util')
 
+local ZONE_SIZE = 240
+local WAVELENGTH = 250
+local XSEED = love.math.random() * ZONE_SIZE
+local YSEED = love.math.random() * ZONE_SIZE
+
 world = {}
 local world_mt = {__index = world}
 
@@ -154,12 +159,9 @@ function world:init(id, width, height, map_size)
   self.gfx = load_gfx(atlas[id].texture)
   self.quads = load_quads(atlas[id].frameset)
   self.tile_size = framesets[atlas[id].frameset].size
-  self.map_size = map_size
   self.rng = love.math.newRandomGenerator()
 
-  self:gen_terrain()
-  self:gen_map()
-
+  self.map_size = map_size
   self.width = width
   self.height = height
 
@@ -171,34 +173,55 @@ end
 function world:update()
   local x_start = 0
   self.x_off = self.x
+
   while self.x_off + self.tile_size <= 0 do
     self.x_off = self.x_off + self.tile_size
     x_start = x_start + 1
   end
 
+  while self.x_off - self.tile_size >= 0 do
+    self.x_off = self.x_off - self.tile_Size
+    x_start = x_start - 1
+  end
+
   local y_start = 0
   self.y_off = self.y
+
   while self.y_off + self.tile_size <= 0 do
     self.y_off = self.y_off + self.tile_size
     y_start = y_start + 1
+  end
+
+  while self.y_off - self.tile_size >= 0 do
+    self.y_off = self.y_off - self.tile_Size
+    y_start = y_start - 1
   end
 
   self.batch:clear()
 
   for x = 0, self.width - 1 do
     for y = 0, self.height - 1 do
-      if self.tiles[x_start + x] and self.tiles[x_start + x][y_start + y] then
-        local tile = self.tiles[x_start + x][y_start + y]
-        local grass_tex = self.grass_map[x_start + x][y_start + y]
-        local dirt_tex = self.dirt_map[x_start + x][y_start + y]
-        local tree_tex = self.tree_map[x_start + x][y_start + y]
+      local xreal = x_start + x
+      local yreal = y_start + y
 
-        self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
-        self.batch:add(self.quads[dirt_tex], x * self.tile_size, y * self.tile_size)
-        if tree_tex then
-          self.batch:add(self.quads[tree_tex], x * self.tile_size, y * self.tile_size)
-        end
+      local xzone = math.floor(xreal / ZONE_SIZE)
+      local yzone = math.floor(yreal / ZONE_SIZE)
+
+      local xcenter = xzone * ZONE_SIZE + ZONE_SIZE / 2
+      local ycenter = yzone * ZONE_SIZE + ZONE_SIZE / 2
+
+      local zone = math.floor(love.math.noise(XSEED + xzone, YSEED + yzone) * 4) + 1
+      local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
+      local prob = 1 - dist^2
+      local val = love.math.noise(xreal / WAVELENGTH + XSEED, yreal / WAVELENGTH + YSEED)
+
+      local grass_tex = 0
+
+      if val < prob then
+        grass_tex = zone * 32
       end
+
+      self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
     end
   end
 

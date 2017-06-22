@@ -16,7 +16,7 @@ framesets = {
 
   map = {
     size = 16,
-    num = 8,
+    num = 32,
   },
 }
 
@@ -26,8 +26,8 @@ atlas = {
     frameset = "actor",
   },
 
-  map_field = {
-    texture = "map_field",
+  map = {
+    texture = "map",
     frameset = "map",
   },
 
