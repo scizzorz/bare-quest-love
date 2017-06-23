@@ -3,7 +3,12 @@ require('gfx')
 require('util')
 
 local ZONE_SIZE = 240
-local WAVELENGTH = 250
+local ZONE_OCTAVE = 250
+local DIRT_OCTAVE = 50
+local TREE_OCTAVE = 30
+
+local TREE_THRESH = 0.05
+local DIRT_THRESH = 0.06
 
 world = {}
 local world_mt = {__index = world}
@@ -53,27 +58,46 @@ function world:get_tile(xreal, yreal)
   local zone = math.floor(love.math.noise(self.xseed + xzone, self.yseed + yzone) * 4) + 1
   local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
   local prob = 1 - dist^2
-  local val = love.math.noise(xreal / WAVELENGTH + self.xseed, yreal / WAVELENGTH + self.yseed)
+
+  -- compute noise vars
+  love.math.setRandomSeed(xreal * yreal)
+
+  local zone_noise = love.math.noise(xreal / ZONE_OCTAVE + self.xseed, yreal / ZONE_OCTAVE + self.yseed)
+  local tree_noise = love.math.noise(xreal / TREE_OCTAVE + self.xseed, yreal / TREE_OCTAVE + self.yseed)
+  local dirt_noise = love.math.noise(xreal / DIRT_OCTAVE + self.xseed, yreal / DIRT_OCTAVE + self.yseed)
+  local tex_noise = love.math.random()
 
   -- get a second set of random for this tile
-  love.math.setRandomSeed(xreal * yreal)
-  local subval = love.math.random()
 
   local grass_tex = 0
+  local tree_tex = nil
+  local dirt_tex = nil
 
   -- determine the type of grass
-  if subval < 0.8 then
-    grass_tex = math.floor(subval / 0.8 * 4)
+  if tex_noise < 0.8 then
+    grass_tex = math.floor(tex_noise / 0.8 * 4)
   else
-    grass_tex = math.floor((subval - 0.8) / 0.2 * 3) + 4
+    grass_tex = math.floor((tex_noise - 0.8) / 0.2 * 3) + 4
+  end
+
+  -- determine the type of tree
+  if tree_noise < TREE_THRESH then
+    tree_tex = 7
+  end
+
+  -- determine the type of dirt
+  if dirt_noise < DIRT_THRESH then
+    dirt_tex = 23
   end
 
   -- shift it into this zone's style
-  if val < prob then
+  if zone_noise < prob then
     grass_tex = grass_tex + zone * 32
+    tree_tex = tree_tex and tree_tex + zone * 32
+    dirt_tex = dirt_tex and dirt_tex + zone * 32
   end
 
-  return grass_tex
+  return grass_tex, tree_tex, dirt_tex
 end
 
 function world:init(id, width, height, map_size)
@@ -108,7 +132,7 @@ function world:update()
   end
 
   while self.x_off - self.tile_size >= 0 do
-    self.x_off = self.x_off - self.tile_Size
+    self.x_off = self.x_off - self.tile_size
     x_start = x_start - 1
   end
 
@@ -121,7 +145,7 @@ function world:update()
   end
 
   while self.y_off - self.tile_size >= 0 do
-    self.y_off = self.y_off - self.tile_Size
+    self.y_off = self.y_off - self.tile_size
     y_start = y_start - 1
   end
 
@@ -132,9 +156,13 @@ function world:update()
       local xreal = x_start + x
       local yreal = y_start + y
 
-      local grass_tex, tree_tex = self:get_tile(xreal, yreal)
+      local grass_tex, tree_tex, dirt_tex = self:get_tile(xreal, yreal)
 
       self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
+
+      if dirt_tex then
+        self.batch:add(self.quads[dirt_tex], x * self.tile_size, y * self.tile_size)
+      end
 
       if tree_tex then
         self.batch:add(self.quads[tree_tex], x * self.tile_size, y * self.tile_size)
