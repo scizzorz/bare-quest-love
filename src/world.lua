@@ -20,63 +20,6 @@ function world.new(...)
   return ret
 end
 
-function world:gen_terrain()
-  self.tiles = {}
-
-  for x = 0, self.map_size - 1 do
-    self.tiles[x] = {}
-    for y = 0, self.map_size - 1 do
-      self.tiles[x][y] = self.GRASS
-    end
-  end
-
-  while self:density() <= 0.15 do
-    local x = math.floor(self.rng:random() * self.map_size)
-    local y = math.floor(self.rng:random() * self.map_size)
-    local tile = math.floor(self.rng:random() * self.NUM_TILES)
-    self:corrupt(x, y, tile, 0.8, 0.8)
-  end
-end
-
-function world:density()
-  local total = 0
-  local taken = 0
-
-  for x = 0, self.map_size - 1 do
-    for y = 0, self.map_size - 1 do
-      total = total + 1
-      if self.tiles[x][y] ~= self.GRASS then
-        taken = taken + 1
-      end
-    end
-  end
-
-  return taken / total
-end
-
-function world:corrupt(x, y, tile, spread, decay)
-  -- don't corrupt near the edges
-  if x < 5 or y < 5 or x > self.map_size - 5 or y > self.map_size - 5 then
-    return
-  end
-
-  self.tiles[x][y] = tile
-
-  -- recursively corrupt
-  if self.rng:random() <= spread then
-    self:corrupt(x - 1, y, tile, spread * decay, decay)
-  end
-  if self.rng:random() <= spread then
-    self:corrupt(x + 1, y, tile, spread * decay, decay)
-  end
-  if self.rng:random() <= spread then
-    self:corrupt(x, y - 1, tile, spread * decay, decay)
-  end
-  if self.rng:random() <= spread then
-    self:corrupt(x, y + 1, tile, spread * decay, decay)
-  end
-end
-
 function world:check_corner(expect, x, y)
   if x > 0 and y > 0 and self.tiles[x-1][y-1] == expect then
     return true
