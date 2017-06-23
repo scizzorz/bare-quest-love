@@ -45,7 +45,7 @@ function overworldctl:update(dt)
   map:update()
 
   if pressed then
-    self:move(stick_x, stick_y)
+    self:move(stick_x * math.abs(stick_x), stick_y * math.abs(stick_y))
   end
 
   return true
