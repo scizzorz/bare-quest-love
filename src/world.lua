@@ -110,8 +110,8 @@ function world:init(id, width, height, map_size)
   self.tile_size = framesets[atlas[id].frameset].size
 
   self.rng = love.math.newRandomGenerator()
-  self.xseed = self.rng.random() * ZONE_SIZE
-  self.yseed = self.rng.random() * ZONE_SIZE
+  self.xseed = self.rng:random() * ZONE_SIZE
+  self.yseed = self.rng:random() * ZONE_SIZE
 
   self.map_size = map_size
   self.width = width
