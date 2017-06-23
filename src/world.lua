@@ -40,56 +40,40 @@ function world:check_corner(expect, x, y)
   return false
 end
 
-function world:gen_map()
-  self.grass_map = {}
-  self.dirt_map = {}
-  self.tree_map = {}
+function world:get_tile(xreal, yreal)
+  -- compute zone coordinates
+  local xzone = math.floor(xreal / ZONE_SIZE)
+  local yzone = math.floor(yreal / ZONE_SIZE)
 
-  for x = 0, self.map_size - 1 do
-    self.grass_map[x] = {}
-    self.dirt_map[x] = {}
-    self.tree_map[x] = {}
+  -- compute real center coordiantes
+  local xcenter = xzone * ZONE_SIZE + ZONE_SIZE / 2
+  local ycenter = yzone * ZONE_SIZE + ZONE_SIZE / 2
 
-    for y = 0, self.map_size - 1 do
-      -- draw grass layer
-      if self.rng:random() < 0.8 then
-        self.grass_map[x][y] = math.floor(self.rng:random() * 4)
-      else
-        self.grass_map[x][y] = math.floor(self.rng:random() * 3) + 4
-      end
+  -- compute the altitude of zone change
+  local zone = math.floor(love.math.noise(self.xseed + xzone, self.yseed + yzone) * 4) + 1
+  local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
+  local prob = 1 - dist^2
+  local val = love.math.noise(xreal / WAVELENGTH + self.xseed, yreal / WAVELENGTH + self.yseed)
 
-      -- draw dirt patches
-      local frame = 8
-      if self:check_corner(self.DIRT, x, y+1) then
-        frame = frame + 1
-      end
-      if self:check_corner(self.DIRT, x+1, y+1) then
-        frame = frame + 2
-      end
-      if self:check_corner(self.DIRT, x+1, y) then
-        frame = frame + 4
-      end
-      if self:check_corner(self.DIRT, x, y) then
-        frame = frame + 8
-      end
+  -- get a second set of random for this tile
+  love.math.setRandomSeed(xreal * yreal)
+  local subval = love.math.random()
 
-      self.dirt_map[x][y] = frame
+  local grass_tex = 0
 
-      -- draw trees
-      frame = 0
-      if self.tiles[x][y] == self.DIRT then
-        frame = 23
-      elseif self.tiles[x][y] == self.BLOCK then
-        frame = 7
-      elseif self.tiles[x][y] == self.EDGE then
-        frame = 7
-      end
-
-      if frame > 0 then
-        self.tree_map[x][y] = frame
-      end
-    end
+  -- determine the type of grass
+  if subval < 0.8 then
+    grass_tex = math.floor(subval / 0.8 * 4)
+  else
+    grass_tex = math.floor((subval - 0.8) / 0.2 * 3) + 4
   end
+
+  -- shift it into this zone's style
+  if val < prob then
+    grass_tex = grass_tex + zone * 32
+  end
+
+  return grass_tex
 end
 
 function world:init(id, width, height, map_size)
@@ -148,34 +132,13 @@ function world:update()
       local xreal = x_start + x
       local yreal = y_start + y
 
-      local xzone = math.floor(xreal / ZONE_SIZE)
-      local yzone = math.floor(yreal / ZONE_SIZE)
-
-      local xcenter = xzone * ZONE_SIZE + ZONE_SIZE / 2
-      local ycenter = yzone * ZONE_SIZE + ZONE_SIZE / 2
-
-      local zone = math.floor(love.math.noise(self.xseed + xzone, self.yseed + yzone) * 4) + 1
-      local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
-      local prob = 1 - dist^2
-      local val = love.math.noise(xreal / WAVELENGTH + self.xseed, yreal / WAVELENGTH + self.yseed)
-
-      love.math.setRandomSeed(xreal * yreal)
-      local subval = love.math.random()
-
-      local grass_tex = 0
-
-      if subval < 0.8 then
-        grass_tex = math.floor(subval / 0.8 * 4)
-      else
-        grass_tex = math.floor((subval - 0.8) / 0.2 * 3) + 4
-      end
-
-
-      if val < prob then
-        grass_tex = grass_tex + zone * 32
-      end
+      local grass_tex, tree_tex = self:get_tile(xreal, yreal)
 
       self.batch:add(self.quads[grass_tex], x * self.tile_size, y * self.tile_size)
+
+      if tree_tex then
+        self.batch:add(self.quads[tree_tex], x * self.tile_size, y * self.tile_size)
+      end
     end
   end
 
