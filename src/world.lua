@@ -123,31 +123,10 @@ function world:init(id, width, height, map_size)
 end
 
 function world:update()
-  local x_start = 0
-  self.x_off = self.x
-
-  while self.x_off + self.tile_size <= 0 do
-    self.x_off = self.x_off + self.tile_size
-    x_start = x_start + 1
-  end
-
-  while self.x_off - self.tile_size >= 0 do
-    self.x_off = self.x_off - self.tile_size
-    x_start = x_start - 1
-  end
-
-  local y_start = 0
-  self.y_off = self.y
-
-  while self.y_off + self.tile_size <= 0 do
-    self.y_off = self.y_off + self.tile_size
-    y_start = y_start + 1
-  end
-
-  while self.y_off - self.tile_size >= 0 do
-    self.y_off = self.y_off - self.tile_size
-    y_start = y_start - 1
-  end
+  local x_start = -math.floor(self.x / self.tile_size)
+  local y_start = -math.floor(self.y / self.tile_size)
+  self.x_off = self.x % self.tile_size - self.tile_size
+  self.y_off = self.y % self.tile_size - self.tile_size
 
   self.batch:clear()
 
