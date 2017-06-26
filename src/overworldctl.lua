@@ -23,8 +23,8 @@ function overworldctl:init(engine)
   bare.y = HEIGHT / 2 - 8
 
   map = world.new("map", map_width, map_height, map_size)
-  map.x = WIDTH / 2 - map_size * tile_size / 2
-  map.y = HEIGHT / 2 - map_size * tile_size / 2
+  map.x = -WIDTH / 2
+  map.y = -HEIGHT / 2
 
   knob = sprite.new("ui_knob")
   socket = sprite.new("ui_socket")
