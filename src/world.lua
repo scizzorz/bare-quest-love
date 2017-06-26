@@ -45,6 +45,25 @@ function world:check_corner(expect, x, y)
   return false
 end
 
+function world:get_blocked(xreal, yreal)
+  -- compute zone coordinates
+  local xzone = math.floor(xreal / ZONE_SIZE)
+  local yzone = math.floor(yreal / ZONE_SIZE)
+
+  -- compute real center coordiantes
+  local xcenter = xzone * ZONE_SIZE + ZONE_SIZE / 2
+  local ycenter = yzone * ZONE_SIZE + ZONE_SIZE / 2
+
+  -- compute the altitude of zone change
+  local zone = math.floor(love.math.noise(self.xseed + xzone, self.yseed + yzone) * 4) + 1
+  local dist = math.min(1, math.dist(xreal, yreal, xcenter, ycenter) / (ZONE_SIZE / 2))
+  local prob = 1 - dist^2
+
+  local tree_noise = love.math.noise(xreal / TREE_OCTAVE + self.xseed, yreal / TREE_OCTAVE + self.yseed)
+
+  return (tree_noise < TREE_THRESH)
+end
+
 function world:get_tile(xreal, yreal)
   -- compute zone coordinates
   local xzone = math.floor(xreal / ZONE_SIZE)
@@ -123,8 +142,8 @@ function world:init(id, width, height, map_size)
 end
 
 function world:update()
-  local x_start = -math.floor(self.x / self.tile_size)
-  local y_start = -math.floor(self.y / self.tile_size)
+  self.x_start = -math.floor(self.x / self.tile_size)
+  self.y_start = -math.floor(self.y / self.tile_size)
   self.x_off = self.x % self.tile_size - self.tile_size
   self.y_off = self.y % self.tile_size - self.tile_size
 
@@ -132,8 +151,8 @@ function world:update()
 
   for x = 0, self.width - 1 do
     for y = 0, self.height - 1 do
-      local xreal = x_start + x
-      local yreal = y_start + y
+      local xreal = self.x_start + x
+      local yreal = self.y_start + y
 
       local grass_tex, tree_tex, dirt_tex = self:get_tile(xreal, yreal)
 
