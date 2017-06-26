@@ -118,9 +118,9 @@ function overworldctl:move(x, y)
     bare.x = hspace
   end
 
-  if bare.x > WIDTH - 16 - hspace then
-    map.x = map.x - (bare.x - (WIDTH - 16 - hspace))
-    bare.x = (WIDTH - 16 - hspace)
+  if bare.x > WIDTH - bare.size - hspace then
+    map.x = map.x - (bare.x - (WIDTH - bare.size - hspace))
+    bare.x = (WIDTH - bare.size - hspace)
   end
 
   if bare.y < vspace then
@@ -128,8 +128,8 @@ function overworldctl:move(x, y)
     bare.y = vspace
   end
 
-  if bare.y > HEIGHT - 16 - vspace then
-    map.y = map.y - (bare.y - (HEIGHT - 16 - vspace))
-    bare.y = (HEIGHT - 16 - vspace)
+  if bare.y > HEIGHT - bare.size - vspace then
+    map.y = map.y - (bare.y - (HEIGHT - bare.size - vspace))
+    bare.y = (HEIGHT - bare.size - vspace)
   end
 end

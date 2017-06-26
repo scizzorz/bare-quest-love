@@ -14,6 +14,7 @@ end
 function sprite:init(id)
   self.x = 0
   self.y = 0
+  self.size = framesets[atlas[id].frameset].size
   self.sx = 1
   self.sy = 1
   self.angle = 0
